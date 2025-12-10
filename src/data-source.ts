@@ -16,8 +16,7 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'festival',
   entities: [Customer, Item, Order, OrderItem],
-  migrations: ['dist/migrations/*.js'], // build output
-  // para dev, pode usar synchronize = true (é conveniente mas não recomendado em produção)
+  migrations: ['dist/migrations/*.js'],
   synchronize: false,
   logging: false,
 });
