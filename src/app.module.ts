@@ -9,6 +9,8 @@ import { CustomersModule } from './customers/customers.module';
 import { ItemsModule } from './items/items.module';
 import { OrdersModule } from './orders/orders.module';
 import { OrderItemsModule } from './orders/order-items.module';
+import { AuthModule } from './auth/auth.module';
+import { User } from './auth/user.entity';
 
 @Module({
   imports: [
@@ -21,7 +23,7 @@ import { OrderItemsModule } from './orders/order-items.module';
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_DATABASE,
-        entities: [Customer, Item, Order, OrderItem],
+        entities: [Customer, Item, Order, OrderItem, User],
         synchronize: true, // use true só em dev; lembre-se de false em produção
         logging: false,
       }),
@@ -30,6 +32,7 @@ import { OrderItemsModule } from './orders/order-items.module';
     ItemsModule,
     OrdersModule,
     OrderItemsModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
