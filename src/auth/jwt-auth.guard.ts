@@ -1,29 +1,47 @@
 import {
+  Injectable,
   CanActivate,
   ExecutionContext,
-  Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
 
+// 1. Defina interface customizada para o request
+interface AuthenticatedRequest extends Request {
+  user?: any; // Substitua "any" pelo tipo exato do payload do seu JWT, se souber
+}
+
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
-    const req = context.switchToHttp().getRequest<Request>();
-    const auth = req.headers.authorization as string;
+  // 2. Valide a existência do segredo na inicialização (boa prática)
+  private readonly jwtSecret: string;
 
-    if (!auth) {
+  constructor() {
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET não definido nas variáveis de ambiente!');
+    }
+    this.jwtSecret = process.env.JWT_SECRET;
+  }
+
+  canActivate(context: ExecutionContext): boolean {
+    const req = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('Token não informado');
     }
 
-    const token = auth.replace('Bearer ', '').trim();
+    const token = authHeader.replace('Bearer ', '');
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret123');
-      (req as any).user = decoded;
+      // 3. Validação e atribuição tipada do payload
+      const decoded = jwt.verify(token, this.jwtSecret);
+      req.user = decoded;
       return true;
     } catch (err) {
+      // 4. Log apenas para auditoria interna, não exponha detalhes ao usuário
+      console.error('Erro de autenticação JWT:', err);
       throw new UnauthorizedException('Token inválido');
     }
   }

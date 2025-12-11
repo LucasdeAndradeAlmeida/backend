@@ -47,11 +47,15 @@ export class AuthService {
     const match = await bcrypt.compare(dto.password, user.password);
     if (!match) throw new UnauthorizedException('Credenciais inválidas');
 
-    const token = jwt.sign(
-      { sub: user.id, email: user.email },
-      process.env.JWT_SECRET || 'secret123',
-      { expiresIn: '1d' },
-    );
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET não está definido nas variáveis de ambiente');
+    }
+
+    const token = jwt.sign({ sub: user.id, email: user.email }, jwtSecret, {
+      expiresIn: '1d',
+    });
 
     return { token };
   }

@@ -35,8 +35,9 @@ export class ItemsService {
     return this.itemsRepo.save(item);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<{ deleted: boolean }> {
     const item = await this.findOne(id);
     await this.itemsRepo.remove(item);
+    return { deleted: true };
   }
 }

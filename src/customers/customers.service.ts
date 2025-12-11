@@ -44,8 +44,9 @@ export class CustomersService {
     return this.customersRepo.save(customer);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<{ deleted: boolean }> {
     const customer = await this.findOne(id);
     await this.customersRepo.remove(customer);
+    return { deleted: true };
   }
 }

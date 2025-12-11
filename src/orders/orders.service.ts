@@ -108,8 +108,9 @@ export class OrdersService {
     return this.orderRepo.save(order);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<{ deleted: boolean }> {
     const order = await this.findOne(id);
     await this.orderRepo.remove(order);
+    return { deleted: true };
   }
 }

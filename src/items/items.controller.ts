@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   UseGuards,
+  HttpCode,
 } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { CreateItemDto } from './dto/create-item.dto';
@@ -39,6 +40,7 @@ export class ItemsController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   remove(@Param('id') id: number) {
     return this.itemsService.remove(Number(id));
   }
