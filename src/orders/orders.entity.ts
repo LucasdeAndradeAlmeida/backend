@@ -18,14 +18,17 @@ export class Order {
   @Column()
   customerId: number;
 
-  @ManyToOne(() => Customer)
+  @ManyToOne(() => Customer, (customer) => customer.orders, { eager: false })
   @JoinColumn({ name: 'customerId' })
   customer: Customer;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToMany(() => OrderItem, (o) => o.order, { cascade: true })
+  @OneToMany(() => OrderItem, (o) => o.order, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   items: OrderItem[];
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })

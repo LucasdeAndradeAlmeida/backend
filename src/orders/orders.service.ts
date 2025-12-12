@@ -54,16 +54,16 @@ export class OrdersService {
     return this.orderRepo.save(order);
   }
 
-  async findAll(): Promise<Order[]> {
+  findAll() {
     return this.orderRepo.find({
-      relations: ['items', 'items.item'],
+      relations: ['customer', 'items', 'items.item'],
     });
   }
 
   async findOne(id: number): Promise<Order> {
     const order = await this.orderRepo.findOne({
       where: { id },
-      relations: ['items', 'items.item'],
+      relations: ['customer', 'items', 'items.item'],
     });
 
     if (!order) throw new NotFoundException('Pedido não encontrado.');
@@ -72,11 +72,20 @@ export class OrdersService {
   }
 
   async update(id: number, dto: UpdateOrderDto): Promise<Order> {
-    const order = await this.findOne(id);
+    const order = await this.orderRepo.findOne({
+      where: { id },
+      relations: ['items'],
+    });
+
+    if (!order) throw new NotFoundException('Pedido não encontrado');
+
+    // 1️⃣ Remover todos os order_items antigos
+    await this.orderItemRepo.delete({ orderId: id });
 
     let total = 0;
-    const items: OrderItem[] = [];
+    const newItems: OrderItem[] = [];
 
+    // 2️⃣ Adicionar itens novos (sempre com orderId)
     if (dto.items) {
       for (const i of dto.items) {
         const item = await this.itemRepo.findOne({ where: { id: i.itemId } });
@@ -88,7 +97,7 @@ export class OrdersService {
         const subtotal = Number(i.unitPrice) * i.quantity;
         total += subtotal;
 
-        items.push(
+        newItems.push(
           this.orderItemRepo.create({
             orderId: id,
             itemId: i.itemId,
@@ -99,9 +108,10 @@ export class OrdersService {
         );
       }
 
-      order.items = items;
+      order.items = newItems;
     }
 
+    // 3️⃣ Atualizar campos simples
     if (dto.customerId) order.customerId = dto.customerId;
     order.total = total;
 

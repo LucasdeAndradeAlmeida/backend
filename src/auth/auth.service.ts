@@ -19,11 +19,19 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
+    // 1. Verifique o email que está sendo procurado
+    console.log('Tentativa de registro com Email:', dto.email);
+
     const existing = await this.userRepo.findOne({
       where: { email: dto.email },
     });
 
+    // 2. Verifique o resultado da busca
+    console.log('Resultado da busca (existing):', existing);
+
     if (existing) {
+      // 3. Este log indica que a busca retornou algo (problema de consulta)
+      console.log('🚨 CONFLITO: Usuário encontrado. ID:', existing.id);
       throw new ConflictException('Email já está em uso');
     }
 

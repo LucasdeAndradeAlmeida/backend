@@ -6,10 +6,11 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
+import { User } from './user.entity';
 
 // 1. Defina interface customizada para o request
 interface AuthenticatedRequest extends Request {
-  user?: any; // Substitua "any" pelo tipo exato do payload do seu JWT, se souber
+  user?: User; // Substitua "any" pelo tipo exato do payload do seu JWT, se souber
 }
 
 @Injectable()
@@ -37,7 +38,7 @@ export class JwtAuthGuard implements CanActivate {
     try {
       // 3. Validação e atribuição tipada do payload
       const decoded = jwt.verify(token, this.jwtSecret);
-      req.user = decoded;
+      req.user = decoded as User;
       return true;
     } catch (err) {
       // 4. Log apenas para auditoria interna, não exponha detalhes ao usuário
